@@ -33,7 +33,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
-import de.greenrobot.inject.annotation.Extra;
+import de.greenrobot.inject.annotation.InjectExtra;
 import de.greenrobot.inject.annotation.InjectResource;
 import de.greenrobot.inject.annotation.InjectView;
 import de.greenrobot.inject.annotation.OnClick;
@@ -111,9 +111,9 @@ public class Injector {
                 } else if (annotation.annotationType() == InjectResource.class) {
                     Object ressource = findResource(field.getType(), field, (InjectResource) annotation);
                     injectIntoField(field, ressource);
-                } else if (annotation.annotationType() == Extra.class) {
+                } else if (annotation.annotationType() == InjectExtra.class) {
                     if (extras != null) {
-                        Object value = extras.get(((Extra) annotation).key());
+                        Object value = extras.get(((InjectExtra) annotation).key());
                         injectIntoField(field, value);
                     }
                 }
@@ -121,7 +121,7 @@ public class Injector {
         }
     }
 
-    public Object findExtra(Extra annotation) {
+    public Object findExtra(InjectExtra annotation) {
         if (extras == null) {
             throw new InjectException("No intent extras available for extras");
         }

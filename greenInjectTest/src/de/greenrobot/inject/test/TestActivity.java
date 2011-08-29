@@ -21,7 +21,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
-import de.greenrobot.inject.annotation.Extra;
+import de.greenrobot.inject.annotation.InjectExtra;
 import de.greenrobot.inject.annotation.InjectResource;
 import de.greenrobot.inject.annotation.InjectView;
 import de.greenrobot.inject.annotation.OnClick;
@@ -48,7 +48,7 @@ public class TestActivity extends Activity {
      @Value(bindTo=R.id.editText1)
      String value;
      
-     @Extra(key= "color")
+     @InjectExtra(key= "color")
      String color;
 
     @Override
