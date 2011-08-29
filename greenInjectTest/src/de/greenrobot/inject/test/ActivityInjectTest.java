@@ -81,6 +81,28 @@ public class ActivityInjectTest extends ActivityInstrumentationTestCase2<TestAct
     }
 
     @UiThreadTest
+    public void testClickNewThread() throws InterruptedException {
+        Thread uiThread = Thread.currentThread();
+        TestActivity activity = getActivity();
+        Injector.injectInto(activity);
+        assertNull(activity.clickThread);
+
+        assertTrue(activity.findViewById(R.id.button1).performClick());
+        while (activity.clickThread == null) {
+            Thread.sleep(1);
+        }
+        assertSame(uiThread, activity.clickThread);
+
+        activity.clickThread = null;
+        assertTrue(activity.findViewById(R.id.button5).performClick());
+        while (activity.clickThread == null) {
+            Thread.sleep(1);
+        }
+        assertNotSame(uiThread, activity.clickThread);
+
+    }
+
+    @UiThreadTest
     public void testValue() {
         TestActivity activity = getActivity();
         Injector injector = new Injector(activity);

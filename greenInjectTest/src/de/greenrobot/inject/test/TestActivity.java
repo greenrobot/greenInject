@@ -52,6 +52,7 @@ public class TestActivity extends Activity {
     String color;
 
     int clickCount;
+    Thread clickThread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,16 +65,24 @@ public class TestActivity extends Activity {
     @OnClick(id = R.id.button1)
     void clickMe() {
         button1Clicked = true;
+        clickThread = Thread.currentThread();
     }
 
     @OnClick(id = R.id.button2)
     void clickMe(View clickedView) {
         this.clickedView = clickedView;
+        clickThread = Thread.currentThread();
     }
 
     @OnClick(id = { R.id.button3, R.id.button4 })
     void increaseClickCount() {
         clickCount++;
+        clickThread = Thread.currentThread();
+    }
+
+    @OnClick(id = { R.id.button5 }, newThread = true)
+    void clickNewThread() {
+        clickThread = Thread.currentThread();
     }
 
 }

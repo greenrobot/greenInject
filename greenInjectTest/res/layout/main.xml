@@ -1,19 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    >
-<TextView  
-    android:layout_width="fill_parent" 
-    android:layout_height="wrap_content" 
-    android:text="@string/hello"
-    android:id="@+id/textView1"/>
-<Button android:text="Button" android:id="@+id/button1" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
-<Button android:text="Button" android:id="@+id/button2" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
-<Button android:text="Button" android:id="@+id/button3" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
-<Button android:text="Button" android:id="@+id/button4" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
-<EditText android:id="@+id/editText1" android:layout_width="fill_parent" android:layout_height="wrap_content">
-    <requestFocus></requestFocus>
-</EditText>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
+	<TextView
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:text="@string/hello"
+		android:id="@+id/textView1" />
+	<LinearLayout
+		android:layout_width="fill_parent"
+		android:id="@+id/linearLayout1"
+		android:layout_height="wrap_content">
+		<Button
+			android:layout_width="wrap_content"
+			android:text="B1"
+			android:id="@+id/button1"
+			android:layout_height="wrap_content"></Button>
+		<Button
+			android:layout_width="wrap_content"
+			android:text="B2"
+			android:id="@+id/button2"
+			android:layout_height="wrap_content"></Button>
+		<Button
+			android:layout_width="wrap_content"
+			android:text="B3"
+			android:id="@+id/button3"
+			android:layout_height="wrap_content"></Button>
+		<Button
+			android:layout_width="wrap_content"
+			android:text="B4"
+			android:id="@+id/button4"
+			android:layout_height="wrap_content"></Button>
+		<Button
+			android:text="B5"
+			android:id="@+id/button5"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"></Button>
+		<Button
+			android:text="B6"
+			android:id="@+id/button6"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"></Button>
+	</LinearLayout>
+	<EditText
+		android:id="@+id/editText1"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content">
+		<requestFocus></requestFocus>
+	</EditText>
 </LinearLayout>
