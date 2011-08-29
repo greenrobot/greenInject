@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="greenInject" default="build-all">
+
+	<target name="build-all" depends="build-jar, build-javadoc"></target>
+	
+	<target name="build-jar" description="Depends on Eclipse to have everthing compiled into bin/">
+		<mkdir dir="release" />
+		<jar jarfile="release/greenInject.jar">
+			<fileset dir="bin">
+				<include name="de/greenrobot/**" />
+			</fileset>
+		</jar>
+	</target>
+	
+    <target name="build-javadoc" description="Creates javadoc for classes">
+        <delete dir="release/docs/api" />
+        <mkdir dir="release/docs/api" />
+        <javadoc destdir="release/docs/api" author="false" version="false" use="true" windowtitle="greenInject API">
+            <packageset dir="src" defaultexcludes="yes">
+                  <include name="de/greenrobot/inject/**"/>
+            </packageset>
+            <doctitle><![CDATA[<h1>greenInject API</h1>]]></doctitle>
+            <bottom><![CDATA[<i>Copyright &#169; 2011 greenrobot.de. All Rights Reserved.</i>]]></bottom>
+        </javadoc>
+        <jar jarfile="release/greenInject-javadoc.jar" basedir="release/docs/api"/>
+    </target>	
+
+</project>
