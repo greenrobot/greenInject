@@ -43,13 +43,15 @@ public class TestActivity extends Activity {
     Bitmap iconBitmap;
 
     boolean button1Clicked;
-     View clickedView;
-     
-     @Value(bindTo=R.id.editText1)
-     String value;
-     
-     @InjectExtra(key= "color")
-     String color;
+    View clickedView;
+
+    @Value(bindTo = R.id.editText1)
+    String value;
+
+    @InjectExtra(key = "color")
+    String color;
+
+    int clickCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,16 +61,19 @@ public class TestActivity extends Activity {
         textViewReference = findViewById(R.id.textView1);
     }
 
-    @SuppressWarnings("unused")
     @OnClick(id = R.id.button1)
-    private void clickMe() {
+    void clickMe() {
         button1Clicked = true;
     }
 
-    @SuppressWarnings("unused")
     @OnClick(id = R.id.button2)
-    private void clickMe(View clickedView) {
+    void clickMe(View clickedView) {
         this.clickedView = clickedView;
+    }
+
+    @OnClick(id = { R.id.button3, R.id.button4 })
+    void increaseClickCount() {
+        clickCount++;
     }
 
 }

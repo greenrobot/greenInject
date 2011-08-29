@@ -20,5 +20,7 @@ import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
 public @interface OnClick {
-    int id();
+    int[] id();
+
+    boolean newThread() default false;
 }

@@ -61,6 +61,16 @@ public class ActivityInjectTest extends ActivityInstrumentationTestCase2<TestAct
     }
 
     @UiThreadTest
+    public void testClickTwoViews() {
+        TestActivity activity = getActivity();
+        Injector.injectInto(activity);
+        assertEquals(0, activity.clickCount);
+        assertTrue(activity.findViewById(R.id.button3).performClick());
+        assertTrue(activity.findViewById(R.id.button4).performClick());
+        assertEquals(2, activity.clickCount);
+    }
+
+    @UiThreadTest
     public void testClickWithView() {
         TestActivity activity = getActivity();
         Injector.injectInto(activity);

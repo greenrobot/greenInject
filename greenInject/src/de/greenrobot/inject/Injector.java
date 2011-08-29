@@ -20,7 +20,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import android.app.Activity;
 import android.content.Context;
@@ -31,7 +33,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.TextView;
 import de.greenrobot.inject.annotation.InjectExtra;
 import de.greenrobot.inject.annotation.InjectResource;
@@ -91,14 +92,13 @@ public class Injector {
         return injector;
     }
 
+    /** Injects into fields and wires methods. */
     public void injectAll() {
-        long start = System.currentTimeMillis();
         injectFields();
-        injectMethods();
-        long time = System.currentTimeMillis() - start;
-        System.out.println(">>>" + time + "ms");
+        bindMethods();
     }
 
+    /** Injects into fields. */
     public void injectFields() {
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
@@ -121,54 +121,28 @@ public class Injector {
         }
     }
 
-    public Object findExtra(InjectExtra annotation) {
-        if (extras == null) {
-            throw new InjectException("No intent extras available for extras");
-        }
-        return extras.get(annotation.key());
-    }
-
-    public void injectMethods() {
+    /** Wires OnClickListeners to methods. */
+    public void bindMethods() {
         Method[] methods = clazz.getDeclaredMethods();
+        Set<View> modifiedViews = new HashSet<View>();
         for (final Method method : methods) {
             Annotation[] annotations = method.getAnnotations();
             for (Annotation annotation : annotations) {
                 if (annotation.annotationType() == OnClick.class) {
-                    int id = ((OnClick) annotation).id();
-                    View view = findView(method, id);
-                    setOnClickListener(view, method);
+                    bindOnClickListener(method, (OnClick) annotation, modifiedViews);
                 }
             }
         }
     }
 
-    public void setOnClickListener(View view, final Method method) {
+    protected boolean bindOnClickListener(final Method method, OnClick onClick, Set<View> modifiedViews) {
         Class<?>[] parameterTypes = method.getParameterTypes();
+        boolean invokeWithView;
         if (parameterTypes.length == 0) {
-            method.setAccessible(true);
-            view.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    try {
-                        method.invoke(target);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            });
+            invokeWithView = false;
         } else if (parameterTypes.length == 1) {
             if (parameterTypes[0] == View.class) {
-                method.setAccessible(true);
-                view.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        try {
-                            method.invoke(target, v);
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                });
+                invokeWithView = true;
             } else {
                 throw new InjectException("Method may have no parameter or a single View parameter only: "
                         + method.getName() + ", found paramter type " + parameterTypes[0]);
@@ -177,9 +151,22 @@ public class Injector {
             throw new InjectException("Method may have no parameter or a single View parameter only: "
                     + method.getName());
         }
+        method.setAccessible(true);
+        InjectedOnClickListener listener = new InjectedOnClickListener(target, method, invokeWithView,
+                onClick.newThread());
+
+        for (int id : onClick.id()) {
+            View view = findView(method, id);
+            boolean modified = modifiedViews.add(view);
+            if (!modified) {
+                throw new InjectException("View can be bound to methods only once using OnClick: " + method.getName());
+            }
+            view.setOnClickListener(listener);
+        }
+        return invokeWithView;
     }
 
-    private Object findResource(Class<?> type, Member field, InjectResource annotation) {
+    protected Object findResource(Class<?> type, Member field, InjectResource annotation) {
         int id = annotation.id();
         if (type == String.class) {
             return context.getString(id);
@@ -192,7 +179,7 @@ public class Injector {
         }
     }
 
-    public void injectIntoField(Field field, Object value) {
+    protected void injectIntoField(Field field, Object value) {
         try {
             field.setAccessible(true);
             field.set(target, value);
@@ -201,7 +188,7 @@ public class Injector {
         }
     }
 
-    public View findView(Member field, int viewId) {
+    protected View findView(Member field, int viewId) {
         if (activity == null) {
             throw new InjectException("Views can be injected only in activities (member " + field.getName() + " in "
                     + context.getClass());
@@ -213,6 +200,7 @@ public class Injector {
         return view;
     }
 
+    /** Applies the values annotated with @Value to the UI views. */
     public void valuesToUi() {
         checkValueFields();
 
@@ -232,6 +220,7 @@ public class Injector {
         }
     }
 
+    /** Reads the values annotated with @Value from the UI views. */
     public void uiToValues() {
         checkValueFields();
 
