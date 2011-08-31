@@ -15,10 +15,10 @@
  */
 package de.greenrobot.inject;
 
-import java.lang.reflect.Method;
-
 import android.view.View;
 import android.view.View.OnClickListener;
+
+import java.lang.reflect.Method;
 
 class InjectedOnClickListener implements OnClickListener {
 
