@@ -20,6 +20,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Debug;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.UiThreadTest;
 import android.view.View;
@@ -30,6 +31,7 @@ import android.widget.TextView;
 import de.greenrobot.inject.Injector;
 
 public class ActivityInjectTest extends ActivityInstrumentationTestCase2<TestActivity> {
+    private final boolean methodTracing = false;
 
     public ActivityInjectTest() {
         super("de.greenrobot.inject.test", TestActivity.class);
@@ -37,6 +39,18 @@ public class ActivityInjectTest extends ActivityInstrumentationTestCase2<TestAct
 
     protected void setUp() throws Exception {
         super.setUp();
+        Injector.LOG_PERFORMANCE = true;
+        if (methodTracing) {
+            Debug.startMethodTracing(getName());
+        }
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        if (methodTracing) {
+            Debug.stopMethodTracing();
+        }
+        super.tearDown();
     }
 
     public void testInject() {

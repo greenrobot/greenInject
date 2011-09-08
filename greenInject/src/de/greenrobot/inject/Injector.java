@@ -32,6 +32,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -47,6 +48,7 @@ import de.greenrobot.inject.annotation.Value;
  * @author Markus
  */
 public class Injector {
+    public static boolean LOG_PERFORMANCE;
 
     protected final Context context;
     protected final Object target;
@@ -101,6 +103,7 @@ public class Injector {
 
     /** Injects into fields. */
     public void injectFields() {
+        long start = System.currentTimeMillis();
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
             Annotation[] annotations = field.getAnnotations();
@@ -120,10 +123,15 @@ public class Injector {
                 }
             }
         }
+        if (LOG_PERFORMANCE) {
+            long time = System.currentTimeMillis() - start;
+            Log.d("greenInject", "Injected fields in " + time + "ms (" + fields.length + " fields checked)");
+        }
     }
 
     /** Wires OnClickListeners to methods. */
     public void bindMethods() {
+        long start = System.currentTimeMillis();
         Method[] methods = clazz.getDeclaredMethods();
         Set<View> modifiedViews = new HashSet<View>();
         for (final Method method : methods) {
@@ -133,6 +141,10 @@ public class Injector {
                     bindOnClickListener(method, (OnClick) annotation, modifiedViews);
                 }
             }
+        }
+        if (LOG_PERFORMANCE) {
+            long time = System.currentTimeMillis() - start;
+            Log.d("greenInject", "Bound methods in " + time + "ms (" + methods.length + " methods checked)");
         }
     }
 
@@ -208,7 +220,9 @@ public class Injector {
 
     /** Applies the values annotated with @Value to the UI views. */
     public void valuesToUi() {
+        long start = System.currentTimeMillis();
         checkValueFields();
+        long start2 = System.currentTimeMillis();
 
         for (int i = 0; i < valueFields.size(); i++) {
             Field field = valueFields.get(i);
@@ -234,11 +248,19 @@ public class Injector {
                 }
             }
         }
+        if (LOG_PERFORMANCE) {
+            long time = System.currentTimeMillis() - start;
+            long time2 = System.currentTimeMillis() - start2;
+            Log.d("greenInject", "valuesToUi proccesed " + valueFields.size() + " fields in " + time2 + "/" + time
+                    + "ms");
+        }
     }
 
     /** Reads the values annotated with @Value from the UI views. */
     public void uiToValues() {
+        long start = System.currentTimeMillis();
         checkValueFields();
+        long start2 = System.currentTimeMillis();
 
         for (int i = 0; i < valueFields.size(); i++) {
             Field field = valueFields.get(i);
@@ -248,6 +270,13 @@ public class Injector {
                 String value = ((TextView) view).getText().toString();
                 injectIntoField(field, value);
             }
+        }
+        if (LOG_PERFORMANCE) {
+            long time = System.currentTimeMillis() - start;
+            long time2 = System.currentTimeMillis() - start2;
+            Log.d("greenInject", "uiToValues proccesed " + valueFields.size() + " fields in " + time2 + "/" + time
+                    + "ms");
+
         }
     }
 
