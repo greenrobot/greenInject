@@ -20,7 +20,28 @@ import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
 public @interface OnClick {
-    int[] id();
+    // We cannot use int[] until Android 2.2 is minimum requirement due to
+    // http://code.google.com/p/android/issues/detail?id=5964
+    
+    int id();
+
+    int id2() default 0;
+
+    int id3() default 0;
+
+    int id4() default 0;
+
+    int id5() default 0;
+
+    int id6() default 0;
+
+    int id7() default 0;
+
+    int id8() default 0;
+
+    int id9() default 0;
+
+    int id10() default 0;
 
     boolean newThread() default false;
 }

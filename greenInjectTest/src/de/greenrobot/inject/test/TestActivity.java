@@ -54,6 +54,12 @@ public class TestActivity extends Activity {
     int clickCount;
     Thread clickThread;
 
+    @Value(bindTo = R.id.imageView1)
+    int imageResId1;
+
+    @Value(bindTo = R.id.imageView2)
+    Bitmap imageBitmap;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,13 +80,13 @@ public class TestActivity extends Activity {
         clickThread = Thread.currentThread();
     }
 
-    @OnClick(id = { R.id.button3, R.id.button4 })
+    @OnClick(id = R.id.button3, id2 = R.id.button4)
     void increaseClickCount() {
         clickCount++;
         clickThread = Thread.currentThread();
     }
 
-    @OnClick(id = { R.id.button5 }, newThread = true)
+    @OnClick(id = R.id.button5, newThread = true)
     void clickNewThread() {
         clickThread = Thread.currentThread();
     }

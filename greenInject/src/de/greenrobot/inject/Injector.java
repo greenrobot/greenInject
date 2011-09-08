@@ -33,6 +33,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import de.greenrobot.inject.annotation.InjectExtra;
 import de.greenrobot.inject.annotation.InjectResource;
@@ -155,13 +156,18 @@ public class Injector {
         InjectedOnClickListener listener = new InjectedOnClickListener(target, method, invokeWithView,
                 onClick.newThread());
 
-        for (int id : onClick.id()) {
-            View view = findView(method, id);
-            boolean modified = modifiedViews.add(view);
-            if (!modified) {
-                throw new InjectException("View can be bound to methods only once using OnClick: " + method.getName());
+        int[] ids = { onClick.id(), onClick.id2(), onClick.id3(), onClick.id4(), onClick.id5(), onClick.id6(),
+                onClick.id7(), onClick.id8(), onClick.id9(), onClick.id10() };
+        for (int id : ids) {
+            if (id != 0) {
+                View view = findView(method, id);
+                boolean modified = modifiedViews.add(view);
+                if (!modified) {
+                    throw new InjectException("View can be bound to methods only once using OnClick: "
+                            + method.getName());
+                }
+                view.setOnClickListener(listener);
             }
-            view.setOnClickListener(listener);
         }
         return invokeWithView;
     }
@@ -216,6 +222,16 @@ public class Injector {
             }
             if (view instanceof TextView) {
                 ((TextView) view).setText(value != null ? value.toString() : null);
+            } else if (view instanceof ImageView) {
+                ImageView imageView = (ImageView) view;
+                if (value == null || value instanceof Bitmap) {
+                    imageView.setImageBitmap((Bitmap) value);
+                } else if (value instanceof Integer) {
+                    int resId = (Integer) value;
+                    imageView.setImageResource(resId);
+                } else if (value instanceof Drawable) {
+                    imageView.setImageDrawable((Drawable) value);
+                }
             }
         }
     }

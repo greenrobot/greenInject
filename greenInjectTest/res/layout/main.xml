@@ -50,4 +50,6 @@
 		android:layout_height="wrap_content">
 		<requestFocus></requestFocus>
 	</EditText>
+	<ImageView android:layout_width="wrap_content" android:id="@+id/imageView1" android:layout_height="wrap_content"></ImageView>
+	<ImageView android:layout_width="wrap_content" android:id="@+id/imageView2" android:layout_height="wrap_content"></ImageView>
 </LinearLayout>

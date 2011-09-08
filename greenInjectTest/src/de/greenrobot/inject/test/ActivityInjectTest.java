@@ -16,12 +16,16 @@
 package de.greenrobot.inject.test;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.UiThreadTest;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import de.greenrobot.inject.Injector;
 
@@ -119,6 +123,58 @@ public class ActivityInjectTest extends ActivityInstrumentationTestCase2<TestAct
         editText.setText("tiger");
         injector.uiToValues();
         assertEquals("tiger", activity.value);
+    }
+
+    @UiThreadTest
+    public void testValueImageViewResId() {
+        TestActivity activity = getActivity();
+        Injector injector = new Injector(activity);
+        ImageView imageView = (ImageView) activity.findViewById(R.id.imageView1);
+        Drawable drawable = imageView.getDrawable();
+        assertNull(drawable);
+
+        activity.imageResId1 = R.drawable.icon;
+        injector.valuesToUi();
+
+        drawable = imageView.getDrawable();
+        assertNotNull(drawable);
+
+        injector.uiToValues();
+        assertEquals(R.drawable.icon, activity.imageResId1);
+
+        activity.imageResId1 = 0;
+        injector.valuesToUi();
+
+        drawable = imageView.getDrawable();
+        assertNull(drawable);
+
+    }
+
+    @UiThreadTest
+    public void testValueImageViewBitmap() {
+        TestActivity activity = getActivity();
+        Injector injector = new Injector(activity);
+        ImageView imageView = (ImageView) activity.findViewById(R.id.imageView2);
+        Drawable drawable = imageView.getDrawable();
+        assertNull(drawable);
+
+        Bitmap bitmap = BitmapFactory.decodeResource(getActivity().getResources(), R.drawable.icon);
+        activity.imageBitmap = bitmap;
+        injector.valuesToUi();
+
+        drawable = imageView.getDrawable();
+        assertNotNull(drawable);
+
+        injector.uiToValues();
+        assertEquals(bitmap, activity.imageBitmap);
+
+        activity.imageBitmap = null;
+        injector.valuesToUi();
+
+        drawable = imageView.getDrawable();
+        if (drawable != null) {
+            assertNull(((BitmapDrawable) drawable).getBitmap());
+        }
     }
 
     public void testExtra() {
