@@ -15,10 +15,13 @@
  */
 package de.greenrobot.inject.annotation;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
 public @interface OnClick {
     // We cannot use int[] until Android 2.2 is minimum requirement due to
     // http://code.google.com/p/android/issues/detail?id=5964
