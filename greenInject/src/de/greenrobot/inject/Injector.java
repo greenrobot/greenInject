@@ -19,12 +19,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import android.app.Activity;
 import android.content.Context;
@@ -36,13 +32,10 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 import de.greenrobot.inject.annotation.InjectExtra;
 import de.greenrobot.inject.annotation.InjectResource;
 import de.greenrobot.inject.annotation.InjectView;
 import de.greenrobot.inject.annotation.OnClick;
-import de.greenrobot.inject.annotation.Value;
 
 /**
  * Injects views, resources, extras, etc. into Android activities and arbitrary Java objects.
@@ -52,18 +45,14 @@ import de.greenrobot.inject.annotation.Value;
 public class Injector {
     public static boolean LOG_PERFORMANCE;
 
-    protected static Map<Class<?>, List<Field>> valueFieldsForClass = new ConcurrentHashMap<Class<?>, List<Field>>();
-    protected static Map<Class<?>, List<Integer>> valueViewIdsForClass = new ConcurrentHashMap<Class<?>, List<Integer>>();
-
     protected final Context context;
     protected final Object target;
     protected final Activity activity;
     protected final Resources resources;
     protected final Class<?> clazz;
-    protected List<Field> valueFields;
-    protected List<View> valueViews;
-    protected List<Integer> valueViewIds;
     private final Bundle extras;
+
+    private ValueBinder valueBinder;
 
     public Injector(Context context) {
         this(context, context);
@@ -224,107 +213,25 @@ public class Injector {
         return view;
     }
 
-    /** Applies the values annotated with @Value to the UI views. */
+    private void checkValueBinder() {
+        if (valueBinder == null) {
+            if (activity == null) {
+                throw new InjectException("Value binding requires an activity");
+            }
+            valueBinder = new ValueBinder(activity, target);
+        }
+    }
+
+    /** Convenience for {@link ValueBinder#valuesToUi()}. */
     public void valuesToUi() {
-        long start = System.currentTimeMillis();
-        checkValueFields();
-        long start2 = System.currentTimeMillis();
-
-        for (int i = 0; i < valueFields.size(); i++) {
-            Field field = valueFields.get(i);
-            View view = valueViews.get(i);
-
-            Object value;
-            try {
-                value = field.get(target);
-            } catch (Exception e) {
-                throw new InjectException("Could not get value for field " + field.getName(), e);
-            }
-            if (view instanceof TextView) {
-                ((TextView) view).setText(value != null ? value.toString() : null);
-            } else if (view instanceof ImageView) {
-                ImageView imageView = (ImageView) view;
-                if (value == null || value instanceof Bitmap) {
-                    imageView.setImageBitmap((Bitmap) value);
-                } else if (value instanceof Integer) {
-                    int resId = (Integer) value;
-                    imageView.setImageResource(resId);
-                } else if (value instanceof Drawable) {
-                    imageView.setImageDrawable((Drawable) value);
-                }
-            }
-        }
-        if (LOG_PERFORMANCE) {
-            long time = System.currentTimeMillis() - start;
-            long time2 = System.currentTimeMillis() - start2;
-            Log.d("greenInject", "valuesToUi proccesed " + valueFields.size() + " fields in " + time2 + "/" + time
-                    + "ms");
-        }
+        checkValueBinder();
+        valueBinder.valuesToUi();
     }
 
-    /** Reads the values annotated with @Value from the UI views. */
+    /** Convenience for {@link ValueBinder#valuesToUi()}. */
     public void uiToValues() {
-        long start = System.currentTimeMillis();
-        checkValueFields();
-        long start2 = System.currentTimeMillis();
-
-        for (int i = 0; i < valueFields.size(); i++) {
-            Field field = valueFields.get(i);
-            View view = valueViews.get(i);
-
-            if (view instanceof TextView) {
-                String value = ((TextView) view).getText().toString();
-                injectIntoField(field, value);
-            }
-        }
-        if (LOG_PERFORMANCE) {
-            long time = System.currentTimeMillis() - start;
-            long time2 = System.currentTimeMillis() - start2;
-            Log.d("greenInject", "uiToValues proccesed " + valueFields.size() + " fields in " + time2 + "/" + time
-                    + "ms");
-        }
-    }
-
-    protected void checkValueFields() {
-        if (valueFields == null) {
-            valueFields = valueFieldsForClass.get(clazz);
-            valueViewIds = valueViewIdsForClass.get(clazz);
-            if (valueFields == null || valueViewIds == null) {
-                valueFields = new ArrayList<Field>();
-                valueViewIds = new ArrayList<Integer>();
-                Field[] fields = clazz.getDeclaredFields();
-                for (Field field : fields) {
-                    Value annotation = field.getAnnotation(Value.class);
-                    if (annotation != null) {
-                        field.setAccessible(true);
-                        valueFields.add(field);
-                        int viewId = ((Value) annotation).bindTo();
-                        valueViewIds.add(viewId);
-                    }
-                }
-                valueFieldsForClass.put(clazz, valueFields);
-                valueViewIdsForClass.put(clazz, valueViewIds);
-            }
-        }
-        refreshUiViews();
-    }
-
-    public void refreshUiViews() {
-        if (valueViews == null) {
-            valueViews = new ArrayList<View>();
-        } else {
-            valueViews.clear();
-        }
-        int size = valueFields.size();
-        if (size != valueViewIds.size()) {
-            throw new InjectException("Internal error; size: " + size + " vs. " + valueViewIds.size());
-        }
-        for (int i = 0; i < size; i++) {
-            int viewId = valueViewIds.get(i);
-            Field field = valueFields.get(i);
-            View view = findView(field, viewId);
-            valueViews.add(view);
-        }
+        checkValueBinder();
+        valueBinder.uiToValues();
     }
 
 }
