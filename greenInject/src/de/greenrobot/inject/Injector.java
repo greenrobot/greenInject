@@ -22,7 +22,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import android.app.Activity;
 import android.content.Context;
@@ -50,6 +52,9 @@ import de.greenrobot.inject.annotation.Value;
 public class Injector {
     public static boolean LOG_PERFORMANCE;
 
+    protected static Map<Class<?>, List<Field>> valueFieldsForClass = new ConcurrentHashMap<Class<?>, List<Field>>();
+    protected static Map<Class<?>, List<Integer>> valueViewIdsForClass = new ConcurrentHashMap<Class<?>, List<Integer>>();
+
     protected final Context context;
     protected final Object target;
     protected final Activity activity;
@@ -57,6 +62,7 @@ public class Injector {
     protected final Class<?> clazz;
     protected List<Field> valueFields;
     protected List<View> valueViews;
+    protected List<Integer> valueViewIds;
     private final Bundle extras;
 
     public Injector(Context context) {
@@ -276,43 +282,48 @@ public class Injector {
             long time2 = System.currentTimeMillis() - start2;
             Log.d("greenInject", "uiToValues proccesed " + valueFields.size() + " fields in " + time2 + "/" + time
                     + "ms");
-
         }
     }
 
     protected void checkValueFields() {
         if (valueFields == null) {
-            valueFields = new ArrayList<Field>();
-            valueViews = new ArrayList<View>();
-            Field[] fields = clazz.getDeclaredFields();
-            for (Field field : fields) {
-                Annotation[] annotations = field.getAnnotations();
-                for (Annotation annotation : annotations) {
-                    if (annotation.annotationType() == Value.class) {
+            valueFields = valueFieldsForClass.get(clazz);
+            valueViewIds = valueViewIdsForClass.get(clazz);
+            if (valueFields == null || valueViewIds == null) {
+                valueFields = new ArrayList<Field>();
+                valueViewIds = new ArrayList<Integer>();
+                Field[] fields = clazz.getDeclaredFields();
+                for (Field field : fields) {
+                    Value annotation = field.getAnnotation(Value.class);
+                    if (annotation != null) {
                         field.setAccessible(true);
                         valueFields.add(field);
                         int viewId = ((Value) annotation).bindTo();
-                        View view = findView(field, viewId);
-                        valueViews.add(view);
+                        valueViewIds.add(viewId);
                     }
                 }
+                valueFieldsForClass.put(clazz, valueFields);
+                valueViewIdsForClass.put(clazz, valueViewIds);
             }
         }
+        refreshUiViews();
     }
 
     public void refreshUiViews() {
-        if (valueFields != null) {
+        if (valueViews == null) {
+            valueViews = new ArrayList<View>();
+        } else {
             valueViews.clear();
-            for (Field field : valueFields) {
-                Annotation[] annotations = field.getAnnotations();
-                for (Annotation annotation : annotations) {
-                    if (annotation.annotationType() == Value.class) {
-                        int viewId = ((Value) annotation).bindTo();
-                        View view = findView(field, viewId);
-                        valueViews.add(view);
-                    }
-                }
-            }
+        }
+        int size = valueFields.size();
+        if (size != valueViewIds.size()) {
+            throw new InjectException("Internal error; size: " + size + " vs. " + valueViewIds.size());
+        }
+        for (int i = 0; i < size; i++) {
+            int viewId = valueViewIds.get(i);
+            Field field = valueFields.get(i);
+            View view = findView(field, viewId);
+            valueViews.add(view);
         }
     }
 

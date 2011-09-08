@@ -40,6 +40,7 @@ public class ActivityInjectTest extends ActivityInstrumentationTestCase2<TestAct
     protected void setUp() throws Exception {
         super.setUp();
         Injector.LOG_PERFORMANCE = true;
+        System.gc();
         if (methodTracing) {
             Debug.startMethodTracing(getName());
         }
@@ -50,6 +51,7 @@ public class ActivityInjectTest extends ActivityInstrumentationTestCase2<TestAct
         if (methodTracing) {
             Debug.stopMethodTracing();
         }
+        System.gc();
         super.tearDown();
     }
 
@@ -129,7 +131,7 @@ public class ActivityInjectTest extends ActivityInstrumentationTestCase2<TestAct
 
         activity.value = "rhino";
         injector.valuesToUi();
-
+        
         EditText editText = (EditText) activity.findViewById(R.id.editText1);
         String valueUi = editText.getText().toString();
         assertEquals("rhino", valueUi);
