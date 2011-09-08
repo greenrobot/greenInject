@@ -1,6 +1,7 @@
 greenInject
 ===========
-greenInject is a injection library for Android optimized for minimal size. 
+greenInject is a injection library for Android optimized for minimal size.
+
 Read more about greenInject: https://github.com/greenrobot/greenInject/wiki
 
 Release History
@@ -12,6 +13,7 @@ Release History
 
 ### V0.5 (2011-08-29)
 Initial open source version with basic features:
+
 * Inject views
 * Inject most important resource types
 * Inject Intent extras
