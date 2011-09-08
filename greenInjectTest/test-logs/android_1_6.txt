@@ -1,0 +1,22 @@
+09-08 12:37:38.991: DEBUG/greenInject(317): Injected fields in 42ms (13 fields checked)
+09-08 12:37:39.030: DEBUG/greenInject(317): Bound methods in 38ms (5 methods checked)
+09-08 12:37:39.650: DEBUG/greenInject(317): Injected fields in 16ms (13 fields checked)
+09-08 12:37:39.670: DEBUG/greenInject(317): Bound methods in 26ms (5 methods checked)
+09-08 12:37:40.110: DEBUG/greenInject(317): Injected fields in 15ms (13 fields checked)
+09-08 12:37:40.140: DEBUG/greenInject(317): Bound methods in 25ms (5 methods checked)
+09-08 12:37:40.600: DEBUG/greenInject(317): Injected fields in 15ms (13 fields checked)
+09-08 12:37:40.630: DEBUG/greenInject(317): Bound methods in 29ms (5 methods checked)
+09-08 12:37:41.100: DEBUG/greenInject(317): Injected fields in 16ms (13 fields checked)
+09-08 12:37:41.140: DEBUG/greenInject(317): Bound methods in 42ms (5 methods checked)
+09-08 12:37:41.580: DEBUG/greenInject(317): Injected fields in 19ms (13 fields checked)
+09-08 12:37:41.620: DEBUG/greenInject(317): Bound methods in 38ms (5 methods checked)
+09-08 12:37:42.041: DEBUG/greenInject(317): valuesToUi proccesed 3 fields in 4/11ms
+09-08 12:37:42.050: DEBUG/greenInject(317): uiToValues proccesed 3 fields in 0/0ms
+09-08 12:37:42.510: DEBUG/greenInject(317): valuesToUi proccesed 3 fields in 2/11ms
+09-08 12:37:42.510: DEBUG/greenInject(317): uiToValues proccesed 3 fields in 0/0ms
+09-08 12:37:42.520: DEBUG/greenInject(317): valuesToUi proccesed 3 fields in 2/2ms
+09-08 12:37:43.110: DEBUG/greenInject(317): valuesToUi proccesed 3 fields in 12/18ms
+09-08 12:37:43.110: DEBUG/greenInject(317): uiToValues proccesed 3 fields in 0/0ms
+09-08 12:37:43.110: DEBUG/greenInject(317): valuesToUi proccesed 3 fields in 2/2ms
+09-08 12:37:43.500: DEBUG/greenInject(317): valuesToUi proccesed 3 fields in 3/6ms
+09-08 12:37:43.500: DEBUG/greenInject(317): uiToValues proccesed 3 fields in 0/0ms
