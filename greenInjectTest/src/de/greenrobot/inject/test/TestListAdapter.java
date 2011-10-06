@@ -40,9 +40,9 @@ public class TestListAdapter extends BaseAdapter {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		if(convertView == null) {
 			convertView = inflater.inflate(R.layout.item, null);
-			Injector injector = Injector.inject(context, convertView, items[position]);
-			injector.valuesToUi();
 		}
+		Injector injector = Injector.inject(context, convertView, items[position]);
+		injector.valuesToUi();
 		return convertView;
 	}
 
