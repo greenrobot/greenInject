@@ -43,6 +43,7 @@ public class ValueBinder {
 
     protected final Object target;
     protected final Activity activity;
+	protected final View ui;
 
     protected List<Field> valueFields;
     protected List<View> valueViews;
@@ -57,16 +58,28 @@ public class ValueBinder {
 
     /** If the value fields are in a object different from the activity. */
     public ValueBinder(Activity activity, Object target) {
+    	this(activity, null, target);
+    }
+    
+    /** If the value fields are in a object different from the activity. */
+    public ValueBinder(Activity activity, View ui, Object target) {
         if (activity == null || target == null) {
             throw new IllegalArgumentException("Context/target may not be null");
         }
         this.activity = activity;
+        this.ui = ui;
         this.target = target;
         clazz = target.getClass();
     }
 
     protected View findView(Member field, int viewId) {
-        View view = activity.findViewById(viewId);
+        View view = null;
+        if (ui != null) {
+        	view = ui.findViewById(viewId);
+        }
+        if (view == null) {
+        	view = activity.findViewById(viewId);
+        }
         if (view == null) {
             throw new InjectException("View not found for member " + field.getName());
         }

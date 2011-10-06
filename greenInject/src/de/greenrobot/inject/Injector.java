@@ -46,6 +46,7 @@ public class Injector {
     public static boolean LOG_PERFORMANCE;
 
     protected final Context context;
+    protected final View ui;
     protected final Object target;
     protected final Activity activity;
     protected final Resources resources;
@@ -59,10 +60,15 @@ public class Injector {
     }
 
     public Injector(Context context, Object target) {
+    	this(context, null, target);
+    }
+    
+    public Injector(Context context, View ui, Object target) {
         if (context == null || target == null) {
             throw new IllegalArgumentException("Context/target may not be null");
         }
         this.context = context;
+        this.ui = ui;
         this.target = target;
         resources = context.getResources();
         if (context instanceof Activity) {
@@ -80,12 +86,18 @@ public class Injector {
         clazz = target.getClass();
     }
 
-    public static Injector injectInto(Context context) {
+	public static Injector injectInto(Context context) {
         return inject(context, context);
     }
 
     public static Injector inject(Context context, Object target) {
         Injector injector = new Injector(context, target);
+        injector.injectAll();
+        return injector;
+    }
+
+    public static Injector inject(Context context, View view, Object target) {
+        Injector injector = new Injector(context, view, target);
         injector.injectAll();
         return injector;
     }
@@ -206,7 +218,14 @@ public class Injector {
             throw new InjectException("Views can be injected only in activities (member " + field.getName() + " in "
                     + context.getClass());
         }
-        View view = activity.findViewById(viewId);
+        View view = null;
+        if (ui != null) {
+        	view = ui.findViewById(viewId);        	
+        }
+        if (view == null) {
+        	// fall back to activity if it's not found in ui
+        	view = activity.findViewById(viewId);
+        }
         if (view == null) {
             throw new InjectException("View not found for member " + field.getName());
         }
@@ -218,7 +237,7 @@ public class Injector {
             if (activity == null) {
                 throw new InjectException("Value binding requires an activity");
             }
-            valueBinder = new ValueBinder(activity, target);
+            valueBinder = new ValueBinder(activity, ui, target);
         }
     }
 

@@ -20,6 +20,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ListView;
 import android.widget.TextView;
 import de.greenrobot.inject.annotation.InjectExtra;
 import de.greenrobot.inject.annotation.InjectResource;
@@ -33,6 +34,10 @@ public class TestActivity extends Activity {
     TextView textView;
     View textViewReference;
 
+    @InjectView(id = R.id.listView)
+    ListView listView;
+    ListView listViewReference;
+    
     @InjectResource(id = R.string.app_name)
     String app_name;
 
@@ -66,6 +71,9 @@ public class TestActivity extends Activity {
         setContentView(R.layout.main);
 
         textViewReference = findViewById(R.id.textView1);
+        listViewReference = (ListView)findViewById(R.id.listView);
+
+        listViewReference.setAdapter(new TestListAdapter(this));
     }
 
     @OnClick(id = R.id.button1)
