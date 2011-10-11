@@ -27,6 +27,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import de.greenrobot.inject.annotation.Value;
@@ -102,8 +103,12 @@ public class ValueBinder {
             } catch (Exception e) {
                 throw new InjectException("Could not get value for field " + field.getName(), e);
             }
-            if (view instanceof TextView) {
-                ((TextView) view).setText(value != null ? value.toString() : null);
+            if (view instanceof CompoundButton) {
+            	if( value != null ) {
+            		((CompoundButton) view).setChecked( ((Boolean)value).booleanValue() );
+            	}
+            } else if (view instanceof TextView) {
+                    ((TextView) view).setText(value != null ? value.toString() : null);
             } else if (view instanceof ImageView) {
                 ImageView imageView = (ImageView) view;
                 if (value == null || value instanceof Bitmap) {
@@ -134,7 +139,10 @@ public class ValueBinder {
             Field field = valueFields.get(i);
             View view = valueViews.get(i);
 
-            if (view instanceof TextView) {
+            if (view instanceof CompoundButton) {
+                boolean value = ((CompoundButton) view).isChecked();
+                injectIntoField(field, value);
+            } else if (view instanceof TextView) {
                 String value = ((TextView) view).getText().toString();
                 injectIntoField(field, value);
             }

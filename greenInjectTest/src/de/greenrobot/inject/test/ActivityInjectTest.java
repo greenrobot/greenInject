@@ -25,6 +25,7 @@ import android.test.ActivityInstrumentationTestCase2;
 import android.test.UiThreadTest;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
@@ -165,6 +166,24 @@ public class ActivityInjectTest extends ActivityInstrumentationTestCase2<TestAct
         editText.setText("tiger");
         injector.uiToValues();
         assertEquals("tiger", activity.value);
+    }
+
+    @UiThreadTest
+    public void testCheckBox() {
+        TestActivity activity = getActivity();
+        Injector injector = new Injector(activity);
+
+        assertFalse(activity.check);
+
+        activity.check = true;
+        injector.valuesToUi();
+        
+        CheckBox checkBox = (CheckBox) activity.findViewById(R.id.checkBox1);
+        assertTrue(checkBox.isChecked());
+
+        checkBox.setChecked(false);
+        injector.uiToValues();
+        assertFalse(activity.check);
     }
 
     @UiThreadTest

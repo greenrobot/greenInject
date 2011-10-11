@@ -20,6 +20,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
 import de.greenrobot.inject.annotation.InjectExtra;
@@ -38,6 +39,9 @@ public class TestActivity extends Activity {
     ListView listView;
     ListView listViewReference;
     
+    @InjectView(id = R.id.checkBox1)
+    CheckBox checkBox;
+
     @InjectResource(id = R.string.app_name)
     String app_name;
 
@@ -50,6 +54,9 @@ public class TestActivity extends Activity {
     boolean button1Clicked;
     View clickedView;
 
+    @Value(bindTo = R.id.checkBox1)
+    boolean check;
+    
     @Value(bindTo = R.id.editText1)
     String value;
 
