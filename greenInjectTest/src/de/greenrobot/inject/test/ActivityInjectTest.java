@@ -33,11 +33,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import de.greenrobot.inject.Injector;
 
-public class ActivityInjectTest extends ActivityInstrumentationTestCase2<TestActivity> {
+public class ActivityInjectTest extends ActivityInstrumentationTestCase2<TestInheritedActivity> {
     private final boolean methodTracing = false;
 
     public ActivityInjectTest() {
-        super("de.greenrobot.inject.test", TestActivity.class);
+        super("de.greenrobot.inject.test", TestInheritedActivity.class);
     }
 
     protected void setUp() throws Exception {

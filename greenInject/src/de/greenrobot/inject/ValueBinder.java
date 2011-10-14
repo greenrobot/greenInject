@@ -18,6 +18,9 @@ package de.greenrobot.inject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -170,7 +173,7 @@ public class ValueBinder {
             if (valueFields == null || valueViewIds == null) {
                 valueFields = new ArrayList<Field>();
                 valueViewIds = new ArrayList<Integer>();
-                Field[] fields = clazz.getDeclaredFields();
+                Collection<Field> fields = getAllFields(clazz); // TODO get recursive
                 for (Field field : fields) {
                     Value annotation = field.getAnnotation(Value.class);
                     if (annotation != null) {
@@ -204,5 +207,19 @@ public class ValueBinder {
             valueViews.add(view);
         }
     }
+    
+    private Collection<Field> getAllFields(Class<?> type) {
+    	List<Field> fields = new LinkedList<Field>();
+	    fields.addAll(Arrays.asList(type.getDeclaredFields()));
+
+	    if (type.getSuperclass() != null) {
+	        fields.addAll(getAllFields(type.getSuperclass()));
+	    }
+	    for( Class<?> intf : type.getInterfaces() ) {
+	        fields.addAll(getAllFields(intf));	    	
+	    }
+
+	    return fields;
+	}
 
 }

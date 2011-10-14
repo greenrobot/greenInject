@@ -10,5 +10,6 @@
 
     <uses-library android:name="android.test.runner" />
     <activity android:name="TestActivity"></activity>
+    <activity android:name="TestInheritedActivity"></activity>
     </application>
 </manifest>
