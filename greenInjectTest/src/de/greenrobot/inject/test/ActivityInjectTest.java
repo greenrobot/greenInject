@@ -25,16 +25,19 @@ import android.test.ActivityInstrumentationTestCase2;
 import android.test.UiThreadTest;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import de.greenrobot.inject.Injector;
 
-public class ActivityInjectTest extends ActivityInstrumentationTestCase2<TestActivity> {
+public class ActivityInjectTest extends ActivityInstrumentationTestCase2<TestInheritedActivity> {
     private final boolean methodTracing = false;
 
     public ActivityInjectTest() {
-        super("de.greenrobot.inject.test", TestActivity.class);
+        super("de.greenrobot.inject.test", TestInheritedActivity.class);
     }
 
     protected void setUp() throws Exception {
@@ -58,11 +61,14 @@ public class ActivityInjectTest extends ActivityInstrumentationTestCase2<TestAct
     public void testInject() {
         TestActivity activity = getActivity();
         assertNotNull(activity.textViewReference);
+        assertNotNull(activity.listViewReference);
         assertNull(activity.textView);
+        assertNull(activity.listView);
         assertNull(activity.app_name);
         assertNull(activity.icon);
         Injector.injectInto(activity);
         assertSame(activity.textViewReference, activity.textView);
+        assertSame(activity.listViewReference, activity.listView);
         assertEquals(activity.getString(R.string.app_name), activity.app_name);
         BitmapDrawable drawable = (BitmapDrawable) activity.getResources().getDrawable(R.drawable.icon);
         assertEquals(drawable.getBitmap().getHeight(), activity.icon.getBitmap().getHeight());
@@ -78,6 +84,27 @@ public class ActivityInjectTest extends ActivityInstrumentationTestCase2<TestAct
         View button = activity.findViewById(R.id.button1);
         assertTrue(button.performClick());
         assertTrue(activity.button1Clicked);
+    }
+
+    @UiThreadTest
+    public void testItemClick() {
+        TestActivity activity = getActivity();
+        Injector.injectInto(activity);
+        
+        ListView list = (ListView)activity.findViewById(R.id.listView);
+        ListAdapter adapter = list.getAdapter();
+        TestItemHolder item0 = (TestItemHolder) adapter.getItem(0);
+        TestItemHolder item1 = (TestItemHolder) adapter.getItem(1);
+        assertFalse(item0.clicked);
+        assertFalse(item1.clicked);
+        
+        list.setSelection(0);
+        View itemView = list.getSelectedView();
+        Button button = (Button) itemView.findViewById(R.id.itemButton);
+        assertTrue(button.performClick());
+        
+        assertTrue(item0.clicked);
+        assertFalse(item1.clicked);
     }
 
     @UiThreadTest
@@ -139,6 +166,24 @@ public class ActivityInjectTest extends ActivityInstrumentationTestCase2<TestAct
         editText.setText("tiger");
         injector.uiToValues();
         assertEquals("tiger", activity.value);
+    }
+
+    @UiThreadTest
+    public void testCheckBox() {
+        TestActivity activity = getActivity();
+        Injector injector = new Injector(activity);
+
+        assertFalse(activity.check);
+
+        activity.check = true;
+        injector.valuesToUi();
+        
+        CheckBox checkBox = (CheckBox) activity.findViewById(R.id.checkBox1);
+        assertTrue(checkBox.isChecked());
+
+        checkBox.setChecked(false);
+        injector.uiToValues();
+        assertFalse(activity.check);
     }
 
     @UiThreadTest

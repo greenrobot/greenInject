@@ -19,7 +19,11 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import android.app.Activity;
@@ -46,6 +50,7 @@ public class Injector {
     public static boolean LOG_PERFORMANCE;
 
     protected final Context context;
+    protected final View ui;
     protected final Object target;
     protected final Activity activity;
     protected final Resources resources;
@@ -59,10 +64,15 @@ public class Injector {
     }
 
     public Injector(Context context, Object target) {
+    	this(context, null, target);
+    }
+    
+    public Injector(Context context, View ui, Object target) {
         if (context == null || target == null) {
             throw new IllegalArgumentException("Context/target may not be null");
         }
         this.context = context;
+        this.ui = ui;
         this.target = target;
         resources = context.getResources();
         if (context instanceof Activity) {
@@ -80,12 +90,18 @@ public class Injector {
         clazz = target.getClass();
     }
 
-    public static Injector injectInto(Context context) {
+	public static Injector injectInto(Context context) {
         return inject(context, context);
     }
 
     public static Injector inject(Context context, Object target) {
         Injector injector = new Injector(context, target);
+        injector.injectAll();
+        return injector;
+    }
+
+    public static Injector inject(Context context, View view, Object target) {
+        Injector injector = new Injector(context, view, target);
         injector.injectAll();
         return injector;
     }
@@ -99,7 +115,7 @@ public class Injector {
     /** Injects into fields. */
     public void injectFields() {
         long start = System.currentTimeMillis();
-        Field[] fields = clazz.getDeclaredFields();
+        Collection<Field> fields = getAllFields(clazz);
         for (Field field : fields) {
             Annotation[] annotations = field.getAnnotations();
             for (Annotation annotation : annotations) {
@@ -120,14 +136,14 @@ public class Injector {
         }
         if (LOG_PERFORMANCE) {
             long time = System.currentTimeMillis() - start;
-            Log.d("greenInject", "Injected fields in " + time + "ms (" + fields.length + " fields checked)");
+            Log.d("greenInject", "Injected fields in " + time + "ms (" + fields.size() + " fields checked)");
         }
     }
 
-    /** Wires OnClickListeners to methods. */
+	/** Wires OnClickListeners to methods. */
     public void bindMethods() {
         long start = System.currentTimeMillis();
-        Method[] methods = clazz.getDeclaredMethods();
+        Collection<Method> methods = getAllMethods(clazz);  // TODO get recursive
         Set<View> modifiedViews = new HashSet<View>();
         for (final Method method : methods) {
             Annotation[] annotations = method.getAnnotations();
@@ -139,11 +155,11 @@ public class Injector {
         }
         if (LOG_PERFORMANCE) {
             long time = System.currentTimeMillis() - start;
-            Log.d("greenInject", "Bound methods in " + time + "ms (" + methods.length + " methods checked)");
+            Log.d("greenInject", "Bound methods in " + time + "ms (" + methods.size() + " methods checked)");
         }
     }
 
-    protected boolean bindOnClickListener(final Method method, OnClick onClick, Set<View> modifiedViews) {
+	protected boolean bindOnClickListener(final Method method, OnClick onClick, Set<View> modifiedViews) {
         Class<?>[] parameterTypes = method.getParameterTypes();
         boolean invokeWithView;
         if (parameterTypes.length == 0) {
@@ -206,7 +222,14 @@ public class Injector {
             throw new InjectException("Views can be injected only in activities (member " + field.getName() + " in "
                     + context.getClass());
         }
-        View view = activity.findViewById(viewId);
+        View view = null;
+        if (ui != null) {
+        	view = ui.findViewById(viewId);        	
+        }
+        if (view == null) {
+        	// fall back to activity if it's not found in ui
+        	view = activity.findViewById(viewId);
+        }
         if (view == null) {
             throw new InjectException("View not found for member " + field.getName());
         }
@@ -218,7 +241,7 @@ public class Injector {
             if (activity == null) {
                 throw new InjectException("Value binding requires an activity");
             }
-            valueBinder = new ValueBinder(activity, target);
+            valueBinder = new ValueBinder(activity, ui, target);
         }
     }
 
@@ -233,5 +256,33 @@ public class Injector {
         checkValueBinder();
         valueBinder.uiToValues();
     }
+
+    private Collection<Method> getAllMethods(Class<?> type) {
+    	List<Method> methods = new LinkedList<Method>();
+	    methods.addAll(Arrays.asList(type.getDeclaredMethods()));
+
+	    if (type.getSuperclass() != null) {
+	        methods.addAll(getAllMethods(type.getSuperclass()));
+	    }
+	    for( Class<?> intf : type.getInterfaces() ) {
+	        methods.addAll(getAllMethods(intf));	    	
+	    }
+
+	    return methods;
+	}
+
+    private Collection<Field> getAllFields(Class<?> type) {
+    	List<Field> fields = new LinkedList<Field>();
+	    fields.addAll(Arrays.asList(type.getDeclaredFields()));
+
+	    if (type.getSuperclass() != null) {
+	        fields.addAll(getAllFields(type.getSuperclass()));
+	    }
+	    for( Class<?> intf : type.getInterfaces() ) {
+	        fields.addAll(getAllFields(intf));	    	
+	    }
+
+	    return fields;
+	}
 
 }

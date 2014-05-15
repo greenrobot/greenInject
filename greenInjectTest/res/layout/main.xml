@@ -44,6 +44,7 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"></Button>
 	</LinearLayout>
+	<CheckBox android:text="CheckBox" android:id="@+id/checkBox1" android:layout_width="wrap_content" android:layout_height="wrap_content"></CheckBox>
 	<EditText
 		android:id="@+id/editText1"
 		android:layout_width="fill_parent"
@@ -52,4 +53,5 @@
 	</EditText>
 	<ImageView android:layout_width="wrap_content" android:id="@+id/imageView1" android:layout_height="wrap_content"></ImageView>
 	<ImageView android:layout_width="wrap_content" android:id="@+id/imageView2" android:layout_height="wrap_content"></ImageView>
+	<ListView android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/listView"></ListView>
 </LinearLayout>

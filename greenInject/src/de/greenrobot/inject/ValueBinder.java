@@ -18,6 +18,9 @@ package de.greenrobot.inject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,6 +30,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import de.greenrobot.inject.annotation.Value;
@@ -43,6 +47,7 @@ public class ValueBinder {
 
     protected final Object target;
     protected final Activity activity;
+	protected final View ui;
 
     protected List<Field> valueFields;
     protected List<View> valueViews;
@@ -57,16 +62,28 @@ public class ValueBinder {
 
     /** If the value fields are in a object different from the activity. */
     public ValueBinder(Activity activity, Object target) {
+    	this(activity, null, target);
+    }
+    
+    /** If the value fields are in a object different from the activity. */
+    public ValueBinder(Activity activity, View ui, Object target) {
         if (activity == null || target == null) {
             throw new IllegalArgumentException("Context/target may not be null");
         }
         this.activity = activity;
+        this.ui = ui;
         this.target = target;
         clazz = target.getClass();
     }
 
     protected View findView(Member field, int viewId) {
-        View view = activity.findViewById(viewId);
+        View view = null;
+        if (ui != null) {
+        	view = ui.findViewById(viewId);
+        }
+        if (view == null) {
+        	view = activity.findViewById(viewId);
+        }
         if (view == null) {
             throw new InjectException("View not found for member " + field.getName());
         }
@@ -89,8 +106,12 @@ public class ValueBinder {
             } catch (Exception e) {
                 throw new InjectException("Could not get value for field " + field.getName(), e);
             }
-            if (view instanceof TextView) {
-                ((TextView) view).setText(value != null ? value.toString() : null);
+            if (view instanceof CompoundButton) {
+            	if( value != null ) {
+            		((CompoundButton) view).setChecked( ((Boolean)value).booleanValue() );
+            	}
+            } else if (view instanceof TextView) {
+                    ((TextView) view).setText(value != null ? value.toString() : null);
             } else if (view instanceof ImageView) {
                 ImageView imageView = (ImageView) view;
                 if (value == null || value instanceof Bitmap) {
@@ -121,7 +142,10 @@ public class ValueBinder {
             Field field = valueFields.get(i);
             View view = valueViews.get(i);
 
-            if (view instanceof TextView) {
+            if (view instanceof CompoundButton) {
+                boolean value = ((CompoundButton) view).isChecked();
+                injectIntoField(field, value);
+            } else if (view instanceof TextView) {
                 String value = ((TextView) view).getText().toString();
                 injectIntoField(field, value);
             }
@@ -149,7 +173,7 @@ public class ValueBinder {
             if (valueFields == null || valueViewIds == null) {
                 valueFields = new ArrayList<Field>();
                 valueViewIds = new ArrayList<Integer>();
-                Field[] fields = clazz.getDeclaredFields();
+                Collection<Field> fields = getAllFields(clazz); // TODO get recursive
                 for (Field field : fields) {
                     Value annotation = field.getAnnotation(Value.class);
                     if (annotation != null) {
@@ -183,5 +207,19 @@ public class ValueBinder {
             valueViews.add(view);
         }
     }
+    
+    private Collection<Field> getAllFields(Class<?> type) {
+    	List<Field> fields = new LinkedList<Field>();
+	    fields.addAll(Arrays.asList(type.getDeclaredFields()));
+
+	    if (type.getSuperclass() != null) {
+	        fields.addAll(getAllFields(type.getSuperclass()));
+	    }
+	    for( Class<?> intf : type.getInterfaces() ) {
+	        fields.addAll(getAllFields(intf));	    	
+	    }
+
+	    return fields;
+	}
 
 }
